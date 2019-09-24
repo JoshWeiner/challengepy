@@ -1,0 +1,53 @@
+{% extends 'home.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block title %} Home{% endblock %}
+
+{% block body %}
+<ul class="nav justify-content-end nav-pills" style="padding: 1em; background-color: mediumaquamarine;">
+  <li class="nav-item">
+    <a class="nav-link active" href="/">Home</a>
+  </li>
+    {% if loggedin %}
+      <li class="nav-item">
+        <a class="nav-link" href="/logout" style="color:white">Logout</a>
+      </li>
+      {% else %}
+      <li class="nav-item">
+        <a class="nav-link" href="/register"style="color:white">Register</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/login" style="color:white">Login</a>
+      </li>
+      {% endif %}
+</ul>
+<div class="text-center">Welcome to Penn Club Review{% if loggedin %}, <strong>{{username}}</strong>{% endif %}!
+</div>
+<div class="container" style="display: flex; flex-wrap: wrap;">
+{% for club in clubs %}
+    <div class="card" style="width: 18rem; margin: 2em;">
+        <div class="card-header">
+            {% for tag in club['tags'] %}
+            <span class="badge badge-primary">
+                {{tag}}
+            </span>
+            {% endfor %}
+        </div>
+        <div class="card-body">
+        <h5 class="card-title">{{club['club_name']}}</h5>
+        <p class="card-text">{{club['description']}}</p>
+        {% if loggedin %}
+        <button type="button" class="btn btn-info" style="position: absolute; bottom: 0;" onclick="javascript : update({{club['id']}});">Favorites <span id="fav_{{club['id']}}" class="badge badge-light">{{club['favorites']}}</span></button>
+        {% else %}
+        <button type="button" class="btn btn-info" style="position: absolute; bottom: 0;" disabled>Favorites <span class="badge badge-light">{{club['favorites']}}</span></button>
+        {% endif %}
+        </div>
+    </div>
+{% endfor %}
+</div>
+
+<script src="{{url_for('static', filename='clubpage.js')}}"></script>
+{% endblock %}

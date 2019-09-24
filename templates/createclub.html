@@ -1,0 +1,41 @@
+{% extends 'home.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block title %} Home{% endblock %}
+
+{% block body %}
+<div class="signup-form container">
+		<center><p id = 'regii'>Add a club:</p></center>
+		<form>
+  		<h4>Club Name:<h4> <input class = "form-control" type = "text" name = "name" id="name" required><br>
+  		<h4>Description:<h4> <textarea class = "form-control" type = "text" name = "description" id="desc" required></textarea><br>
+        <h4>Tags: </h4>
+        <div id="taglist" class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+        </div><br>
+        <div class="input-group">
+          <select class="custom-select" id="tagselect" aria-label="Select a Tag">
+              <option selected>Select a tag</option>
+              <option value="Contrarian">Contrarian</option>
+              <option value="Environmentally Friendly">Environmentally Friendly</option>
+              <option value="Fans">Fans</option>
+              <option value="Meme">Meme</option>
+              <option value="Performing Arts">Performing Arts</option>
+              <option value="Potato">Potato</option>
+              <option value="Procrastination">Procrastination</option>
+              <option value="Programming">Programming</option>
+              <option value="Social">Social</option>
+              <option value="Technology">Technology</option>
+          </select>
+          <div class="input-group-append">
+            <button id="b" class="btn btn-outline-secondary" type="button">Add</button>
+          </div>
+        </div>
+        <br>
+  		<button id="submit" class="btn btn-info btn-lg btn-block">Submit</button>
+  	</form>
+</div>
+
+<script src="{{url_for('static', filename='clubform.js')}}"></script>
+{% endblock %}
