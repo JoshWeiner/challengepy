@@ -27,3 +27,4 @@
 7. Use of JavaScript, JQuery, and AJAX to update values
    - The dynamic club-form requires AJAX and JQuery to send a POST-request to the new club information to the server.
    - Favoriting clubs also uses AJAX POST-request methods.
+   - **See the static folder for JS, AJAX, and JQuery files**
