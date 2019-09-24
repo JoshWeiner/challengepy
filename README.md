@@ -15,7 +15,7 @@
    - Only users that are logged in are able to 'favorite' a club
 3. API Features fully functional
    - [x] `/api/clubs` `GET` Returns a JSON of all of the attributes of every club
-   - [x] `/api/clubs` `POST` Allows for the addition of new clubs. Navigate to `localhost:5000/club_form` to test out the submission of a new club with tags
+   - [x] `/api/clubs` `POST` Allows for the addition of new clubs. Navigate to `localhost:5000/club_form` to test out the submission of a new club with tags via a dynamic form. Click on individual tags to remove them.
    - [x] `/api/user/<username>` `GET` returns a JSON of the specified user
    - [x] `/api/favorite` `POST` allows for a user to favorite a club if not done before. Test this out by logging in and favoriting a club. Try doing so with multiple accounts
 4. Scraping
