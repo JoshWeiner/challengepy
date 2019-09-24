@@ -49,7 +49,9 @@ def club_form():
     if authenticate.is_loggedin(session):
         is_loggedin = True
         username = session['loggedin']
-    return render_template('createclub.html', loggedin=is_loggedin, username=username)
+        return render_template('createclub.html', loggedin=is_loggedin, username=username)
+    else:
+        flash("You must be logged in to use this feature!", "danger")
 
 @app.route('/api')
 def api():
@@ -120,7 +122,8 @@ def favorite():
             db_func.modify('clubs', 'favorites', fs, "ClubID", club_id)
             return jsonify(dict(redirect='/'))
         else:
-            return jsonify(dict(redirect='/'))
+            return "false"
+    return "false"
 
 
 @app.route('/register', methods=["GET", "POST"])

@@ -10,6 +10,9 @@ var update = function(id) {
         success: function(response) {
             if (response.redirect) {
                 window.location.href = response.redirect;
+            }
+            else {
+                console.log(response);
             };
         }
     });

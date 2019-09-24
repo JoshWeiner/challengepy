@@ -6,8 +6,28 @@
 {% block title %} Home{% endblock %}
 
 {% block body %}
+<ul class="nav justify-content-end nav-pills" style="padding: 1em; background-color: mediumaquamarine;">
+  <li class="nav-item">
+    <a class="nav-link" href="/" style="color:white">Home</a>
+  </li>
+    {% if loggedin %}
+    <li class="nav-item">
+      <a class="nav-link active" href="/club_form" style="color:white">Register a New Club</a>
+    </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/logout" style="color:white">Logout</a>
+      </li>
+      {% else %}
+      <li class="nav-item">
+        <a class="nav-link" href="/register"style="color:white">Register</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/login" style="color:white">Login</a>
+      </li>
+      {% endif %}
+</ul>
 <div class="signup-form container">
-		<center><p id = 'regii'>Add a club:</p></center>
+		<center><h3 id = 'regii'>Add a club:</h3></center>
 		<form>
   		<h4>Club Name:<h4> <input class = "form-control" type = "text" name = "name" id="name" required><br>
   		<h4>Description:<h4> <textarea class = "form-control" type = "text" name = "description" id="desc" required></textarea><br>
