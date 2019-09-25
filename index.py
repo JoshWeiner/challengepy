@@ -120,9 +120,9 @@ def favorite():
             fs = club[3] #club favorites
             fs += 1
             db_func.modify('clubs', 'favorites', fs, "ClubID", club_id)
-            return jsonify(dict(redirect='/'))
+            return jsonify(True)
         else:
-            return "false"
+            return jsonify(False)
     return "false"
 
 
