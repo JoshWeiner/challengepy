@@ -3,34 +3,55 @@ import sqlite3
 import urllib
 import ssl
 import time
+import os
 import sys
 import collections
 
 from flask import Flask, render_template, request, session, redirect, url_for, flash, Response, jsonify
+from flask_sqlalchemy import SQLAlchemy
 from scraper import * # Web Scraping utility functions for Online Clubs with Penn.
 from urllib.request import urlopen
-
-from util import authenticate
-import db_func
+from models import Base, User, Club, Tag
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import create_engine
 
 app = Flask(__name__)
 app.secret_key = "joshuaweinerpennlabs"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pennclubs.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+db = SQLAlchemy(app)
+# from models import db
+db.init_app(app)
+engine = create_engine('sqlite:///pennclubs.db')
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
+from util import authenticate
 
-authenticate.register_user("jen", "P3nnLabs!", "P3nnLabs!")
-html = get_clubs_html()
-s = soupify(html)
-soups = get_clubs(s)
-for soup in soups:
-    name = get_club_name(soup)
-    desc = get_club_description(soup)
-    tags = get_club_tags(soup)
-    favorites = 0
-    t = ""
-    for tag in tags:
-        t += tag + ","
-    t = t[:-1]
-    db_func.add_club(name, desc, t)
-    db_func.modify("clubs", "favorites", 0, "club_name", name)
+
+try:
+    f = open('pennclubs.db')
+    f.close()
+except FileNotFoundError:
+    Base.metadata.create_all(engine)
+    html = get_clubs_html()
+    s = soupify(html)
+    soups = get_clubs(s)
+    for soup in soups:
+        name = get_club_name(soup)
+        desc = get_club_description(soup)
+        tags = get_club_tags(soup)
+        favorites = 0
+        t = []
+        club = Club(club_name=name, description=desc)
+        db_session.add(club)
+        db_session.commit()
+        for tag in tags:
+            t_new = Tag(tag=tag,
+            club_id = db_session.query(Club).filter_by(club_name=name).first().id)
+            db_session.add(t_new)
+            db_session.commit()
 
 @app.route('/')
 def main():
@@ -63,53 +84,59 @@ def api_clubs():
         name = request.json['name']
         description = request.json['description']
         tags = request.json['tags']
-        print(name)
-        t = ""
+        print(name, description, tags)
+        club = Club(club_name=name, description=description)
+        db_session.add(club)
+        db_session.commit()
         for tag in tags:
-            t += tag + ","
-        t = t[:-1]
-        db_func.add_club(name, description, t)
-        db_func.modify("clubs", "favorites", 0, "club_name", name)
+            t_new = Tag(tag=tag,
+            club_id = db_session.query(Club).filter_by(club_name=name).first().id)
+            db_session.add(t_new)
+            db_session.commit()
         flash("Added club " + name + " to the database.", "success")
         return jsonify(dict(redirect='/'))
     else:
-        clubs = db_func.club_json()
+        clubs = db_session.query(Club).all()
         club_list = []
         for club in clubs:
             # print(club)
             d = collections.OrderedDict()
-            d['id'] = club[0]
-            d['club_name'] = club[1]
-            d['tags'] = club[2].split(",")
-            d['description'] = club[3]
-            d['favorites'] = club[4]
+            d['id'] = club.id
+            d['club_name'] = club.club_name
+            tags = club.tags
+            ts = []
+            for t in tags:
+                tg = str(t.tag)
+                ts.append(tg)
+            d['tags'] = ts
+            d['description'] = club.description
+            # d['favorites'] = club[4]
             club_list.append(d)
         j = json.dumps(club_list)
         return j
 
 @app.route("/api/user/<username>", methods=["GET"])
 def get_user(username):
-    user = db_func.getUser(username)
-    for u in user:
-        d = collections.OrderedDict()
-        d['id'] = user[0][0]
-        d['username'] = user[0][1]
-        d['favorites'] = user[0][2]
-        j = jsonify(d)
-        return j
+    user = db_session.query(User).filter_by(username=username).first()
+    d = collections.OrderedDict()
+    d['id'] = user.id
+    d['username'] = user.username
+    favorites = user.favorites
+    fs = []
+    for fave in favorites:
+        fs.append(fave.club_name)
+    d['favorites'] = fs
+    j = jsonify(d)
+    return j
 
 @app.route("/api/favorite", methods=["POST"])
 def favorite():
     if authenticate.is_loggedin(session):
         is_loggedin = True
         username = session['loggedin']
-        user = db_func.getUser(username)
-        faves = user[0][2]
-        favorites = []
-        if faves != "":
-            favorites = faves.split(",")
+        user = db_session.query(User).filter_by(username=username).first()
+        favorites = user.favorites
         club_id = request.json['club_id']
-        faves = ""
         if str(club_id) not in favorites:
             favorites.append(str(club_id))
             for f in favorites:
@@ -182,5 +209,5 @@ def logout():
     return redirect(url_for('main'))
 
 if __name__ == '__main__':
-    # app.debug = True
+
     app.run()

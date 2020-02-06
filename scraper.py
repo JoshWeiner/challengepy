@@ -16,7 +16,7 @@ def get_clubs_html():
     """
     Get the HTML of online clubs with Penn.
     """
-    url = 'https://ocwp.pennlabs.org'
+    url = 'https://ocwp.apps.pennlabs.org'
     return get_html(url)
 
 def soupify(html):

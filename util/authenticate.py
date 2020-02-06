@@ -1,5 +1,8 @@
 import sqlite3
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from models import Base, User
+from index import db_session
 
 def register_user(username, password, repassword):
     '''
@@ -13,14 +16,13 @@ def register_user(username, password, repassword):
         return (False, "Passwords do not match!")
 
     with sqlite3.connect("pennclubs.db") as db:
-        c = db.cursor()
         if user_exists(username):
             return (False, "Username {} already exists.".format(username))
         else:
             pw_hash = generate_password_hash(password)
-            command = "INSERT INTO users (username, password, favorites) VALUES(?, ?, ?);"
-            c.execute(command, (username, pw_hash, ""))
-        db.commit()
+            new_user = User(username=username, password=pw_hash)
+            db_session.add(new_user)
+            db_session.commit()
     return (True, "Successfully registered {}".format(username))
 
 def user_exists(username):
@@ -28,12 +30,9 @@ def user_exists(username):
     Returns whether a user with the given username exists
     '''
     with sqlite3.connect("pennclubs.db") as db:
-        c = db.cursor()
+        u = db_session.query(User).filter_by(username=username).first()
 
-        command = "SELECT * FROM users WHERE username = ?"
-        c.execute(command, (username,))
-
-        return len(c.fetchall()) > 0
+        return u != None
 
 def login_user(username, password):
     '''
@@ -45,13 +44,9 @@ def login_user(username, password):
         return (False, "Username or password missing!")
 
     with sqlite3.connect("pennclubs.db") as db:
-        c = db.cursor()
-        command = "SELECT username, password FROM users;"
-        c.execute(command)
-        for user in c:
-            if user and username == user[0]:
-                if check_password_hash(user[1], password):
-                    return (True, "Successfully logged in!")
+        u = db_session.query(User).filter_by(username=username).first()
+        if u != None and check_password_hash(u.password, password):
+            return (True, "Successfully logged in!")
     return (False, "Incorrect username or password.")
 
 def is_loggedin(session):
@@ -66,7 +61,5 @@ def is_loggedin(session):
 def get_userid(session):
     name = is_loggedin(session)
     with sqlite3.connect("pennclubs.db") as db:
-        c = db.cursor()
-        command = "SELECT userid FROM users WHERE username = ?"
-        c.execute(command, (name,))
-        return c.fetchone()[0]
+        id = db_session.query(User).filter_by(username=name).first().id
+        return id

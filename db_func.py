@@ -68,6 +68,5 @@ def retrieve_clubs():
     return(c.fetchall())
 
 def club_json():
-    command = "SELECT ClubID, club_name, tags, description, favorites FROM clubs"
-    c.execute(command)
-    return c.fetchall()
+    clubs = Club.query().all()
+    return clubs
