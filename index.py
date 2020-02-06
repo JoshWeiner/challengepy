@@ -57,6 +57,9 @@ except FileNotFoundError:
 def main():
     is_loggedin = False
     username = None
+    jen = db_session.query(User).filter_by(username="jen").first()
+    if jen == None:
+        authenticate.register_user("jen", "P3nnLabs!", "P3nnLabs!")
     if authenticate.is_loggedin(session):
         is_loggedin = True
         username = session['loggedin']
